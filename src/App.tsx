@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 
@@ -38,7 +38,7 @@ const App = () => {
             <Sonner />
             <Routes>
               {/* Main Routes */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/order" element={<OrderPage />} />

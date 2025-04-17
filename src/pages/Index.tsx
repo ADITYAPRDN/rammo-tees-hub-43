@@ -14,7 +14,7 @@ const Index = () => {
         </p>
         <div className="space-x-4">
           <Link to="/products">
-            <Button variant="primary">Lihat Produk</Button>
+            <Button variant="default">Lihat Produk</Button>
           </Link>
           <Link to="/order">
             <Button variant="secondary">Pesan Sekarang</Button>
