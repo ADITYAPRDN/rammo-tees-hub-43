@@ -1,13 +1,15 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import PrivateRoute from "@/components/auth/PrivateRoute";
+import Layout from "@/components/layout/Layout";
 
-// Main Pages
-import Index from "./pages/Index";
+// Customer Pages
+import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import OrderPage from "./pages/OrderPage";
@@ -37,15 +39,15 @@ const App = () => {
             <Toaster />
             <Sonner />
             <Routes>
-              {/* Main Routes */}
-              <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/products/:id" element={<ProductDetailPage />} />
-              <Route path="/order" element={<OrderPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/customer" element={<CustomerPage />} />
+              {/* Customer Frontend Routes */}
+              <Route path="/" element={<Layout><HomePage /></Layout>} />
+              <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
+              <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
+              <Route path="/order" element={<Layout><OrderPage /></Layout>} />
+              <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+              <Route path="/customer" element={<Layout><CustomerPage /></Layout>} />
               
-              {/* Admin Routes */}
+              {/* Admin Backend Routes */}
               <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="/admin/dashboard" element={
                 <PrivateRoute requireAdmin>

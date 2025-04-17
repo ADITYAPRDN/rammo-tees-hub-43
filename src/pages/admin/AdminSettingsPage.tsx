@@ -15,27 +15,54 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminSettingsPage = () => {
   const [isAddAdminOpen, setIsAddAdminOpen] = useState(false);
   const [newAdmin, setNewAdmin] = useState({ email: '', password: '', name: '' });
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const handleAddAdmin = async () => {
     try {
-      // TODO: Implement admin creation logic with Supabase
+      setLoading(true);
+      
+      // Create the user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: newAdmin.email,
+        password: newAdmin.password,
+        email_confirm: true
+      });
+      
+      if (authError) throw authError;
+      
+      // If user was created successfully, add them to admin_profiles table
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('admin_profiles')
+          .insert({
+            id: authData.user.id,
+            email: newAdmin.email,
+            is_super_admin: false
+          });
+          
+        if (profileError) throw profileError;
+      }
+      
       toast({
         title: 'Sukses',
         description: 'Admin baru berhasil ditambahkan',
       });
       setIsAddAdminOpen(false);
       setNewAdmin({ email: '', password: '', name: '' });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Gagal menambahkan admin baru',
+        description: error.message || 'Gagal menambahkan admin baru',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,10 +129,12 @@ const AdminSettingsPage = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddAdminOpen(false)}>
+              <Button variant="outline" onClick={() => setIsAddAdminOpen(false)} disabled={loading}>
                 Batal
               </Button>
-              <Button onClick={handleAddAdmin}>Simpan</Button>
+              <Button onClick={handleAddAdmin} disabled={loading}>
+                {loading ? 'Menyimpan...' : 'Simpan'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

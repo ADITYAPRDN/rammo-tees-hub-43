@@ -1,8 +1,9 @@
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, ReactNode } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, Package, Users, BarChart2, Settings, Home, LogOut, Menu, X } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -13,17 +14,10 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut } = useAuth();
   
-  useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      navigate('/admin/login');
-    }
-  }, [navigate]);
-  
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    await signOut();
   };
   
   const navItems = [
