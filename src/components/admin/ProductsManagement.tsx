@@ -14,8 +14,10 @@ import { Plus, Search, Edit, Trash2, Image, Save, X, Upload } from 'lucide-react
 import { 
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger 
 } from '@/components/ui/dialog';
+
+// Update import to use the reexported Product type
 import { 
-  fetchProducts, createProduct, updateProduct, deleteProduct, Product 
+  fetchProducts, createProduct, updateProduct, deleteProduct, type Product 
 } from '@/services/productService';
 import { formatCurrency } from '@/lib/utils';
 

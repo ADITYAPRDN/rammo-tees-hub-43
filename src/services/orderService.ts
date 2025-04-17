@@ -1,6 +1,9 @@
 
 import { Order } from '@/lib/data';
 
+// Export the Order interface again to make it directly available from this service
+export type { Order };
+
 // Menyimpan semua pesanan dalam memori untuk simulasi database
 let orders: Order[] = [
   {

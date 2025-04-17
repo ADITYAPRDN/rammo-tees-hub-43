@@ -12,7 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 import { createOrder } from "@/services/orderService";
-import { Product, fetchProductById } from "@/services/productService";
+// Update import to use the reexported Product type
+import { type Product, fetchProductById } from "@/services/productService";
 import { formatCurrency } from "@/lib/utils";
 
 const OrderForm = () => {

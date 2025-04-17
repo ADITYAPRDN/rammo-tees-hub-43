@@ -13,8 +13,10 @@ import { Search, RefreshCw, Eye, Edit, Trash2, Filter, ArrowUpDown } from 'lucid
 import { 
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose 
 } from '@/components/ui/dialog';
+
+// Update import to use the reexported Order type
 import { 
-  fetchOrders, updateOrderStatus, deleteOrder, Order 
+  fetchOrders, updateOrderStatus, deleteOrder, type Order 
 } from '@/services/orderService';
 import { formatCurrency } from '@/lib/utils';
 

@@ -1,6 +1,9 @@
 
 import { Product } from '@/lib/data';
 
+// Export the Product interface again to make it directly available from this service
+export type { Product };
+
 // Menyimpan semua produk dalam memori untuk simulasi database
 let products: Product[] = [
   {
