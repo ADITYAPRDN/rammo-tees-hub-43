@@ -6,6 +6,7 @@ export interface Product {
   price: number;
   image: string;
   sizes: string[];
+  stock?: number;
 }
 
 export interface Order {
@@ -195,6 +196,17 @@ export const authenticateAdmin = (email: string, password: string): Promise<{ su
     } else {
       resolve({ success: false });
     }
+  });
+};
+
+export const createProduct = (product: Omit<Product, 'id'>): Promise<Product> => {
+  return new Promise((resolve) => {
+    const newProduct: Product = {
+      ...product,
+      id: `${products.length + 1}`
+    };
+    products.push(newProduct);
+    setTimeout(() => resolve(newProduct), 500);
   });
 };
 
