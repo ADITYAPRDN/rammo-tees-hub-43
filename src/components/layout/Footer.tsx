@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Instagram, TikTok, MessageCircle, MapPin } from 'lucide-react';
+import { Instagram, Share2, MessageCircle, MapPin } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -89,7 +89,7 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex items-center">
-                <TikTok className="h-5 w-5 text-primary-500 mr-2" />
+                <Share2 className="h-5 w-5 text-primary-500 mr-2" />
                 <a
                   href="https://tiktok.com/@rammo_tshirts"
                   target="_blank"

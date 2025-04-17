@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Instagram, TikTok, MapPin } from 'lucide-react';
+import { MessageSquare, Instagram, Share2, MapPin } from 'lucide-react';
 
 const ContactSection = () => {
   return (

@@ -2,7 +2,7 @@
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Instagram, TikTok, MapPin } from 'lucide-react';
+import { MessageSquare, Instagram, Share2, MapPin } from 'lucide-react';
 
 const ContactPage = () => {
   return (
@@ -52,7 +52,7 @@ const ContactPage = () => {
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <TikTok className="h-6 w-6 text-primary-500 mt-0.5" />
+                  <Share2 className="h-6 w-6 text-primary-500 mt-0.5" />
                   <div>
                     <h3 className="text-lg font-semibold mb-1">TikTok</h3>
                     <p className="text-gray-600 mb-2">Lihat konten kreatif dan proses produksi kami</p>
