@@ -1,4 +1,3 @@
-
 // Mock data for development
 export interface Product {
   id: string;
@@ -227,6 +226,18 @@ export const deleteProduct = (id: string): Promise<boolean> => {
     const index = products.findIndex(p => p.id === id);
     if (index !== -1) {
       products.splice(index, 1);
+      setTimeout(() => resolve(true), 300);
+    } else {
+      setTimeout(() => resolve(false), 300);
+    }
+  });
+};
+
+export const deleteOrder = (id: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const index = orders.findIndex(o => o.id === id);
+    if (index !== -1) {
+      orders.splice(index, 1);
       setTimeout(() => resolve(true), 300);
     } else {
       setTimeout(() => resolve(false), 300);
