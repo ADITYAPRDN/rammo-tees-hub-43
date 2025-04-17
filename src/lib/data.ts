@@ -256,3 +256,28 @@ export const deleteOrder = (id: string): Promise<boolean> => {
     }
   });
 };
+
+export const getSiteSettings = async () => {
+  // Simulated API call - would fetch from backend in real implementation
+  return {
+    siteName: 'RAMMO Store',
+    siteDescription: 'Toko fashion online dengan produk berkualitas tinggi',
+    phoneNumber: '+6281234567890',
+    whatsapp: '+6281234567890',
+    instagram: '@rammostore',
+    address: 'Jl. Pahlawan No. 123, Surabaya, Indonesia'
+  };
+};
+
+export const updateSiteSettings = async (settings: {
+  siteName: string;
+  siteDescription: string;
+  phoneNumber: string;
+  whatsapp: string;
+  instagram: string;
+  address: string;
+}) => {
+  // Simulated API call - would update settings on backend in real implementation
+  console.log('Settings updated:', settings);
+  return { success: true };
+};
