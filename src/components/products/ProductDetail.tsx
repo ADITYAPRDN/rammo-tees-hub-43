@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft } from 'lucide-react';
-import { fetchProductById, Product } from '@/lib/data';
+import { fetchProductById, Product } from '@/services/productService';
 import { formatCurrency } from '@/lib/utils';
 
 const ProductDetail = () => {
@@ -92,8 +92,8 @@ const ProductDetail = () => {
         <div className="w-full md:w-1/2">
           <div className="aspect-square overflow-hidden rounded-lg border border-gray-200">
             <img
-              src={product.image}
-              alt={product.name}
+              src={product?.image}
+              alt={product?.name}
               className="w-full h-full object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = '/placeholder.svg';
@@ -103,18 +103,20 @@ const ProductDetail = () => {
         </div>
         
         <div className="w-full md:w-1/2">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product.name}</h1>
-          <p className="text-xl font-semibold text-primary-600 mt-2">{formatCurrency(product.price)}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product?.name}</h1>
+          <p className="text-xl font-semibold text-primary-600 mt-2">
+            {product?.price ? formatCurrency(product.price) : ''}
+          </p>
           
           <div className="mt-4">
             <h3 className="font-medium text-gray-900">Deskripsi</h3>
-            <p className="mt-2 text-gray-600">{product.description}</p>
+            <p className="mt-2 text-gray-600">{product?.description}</p>
           </div>
           
           <div className="mt-6">
             <h3 className="font-medium text-gray-900">Ukuran yang Tersedia</h3>
             <div className="flex flex-wrap gap-2 mt-2">
-              {product.sizes.map((size) => (
+              {product?.sizes.map((size) => (
                 <Badge key={size} variant="outline" className="text-sm">
                   {size}
                 </Badge>
@@ -122,7 +124,7 @@ const ProductDetail = () => {
             </div>
           </div>
           
-          <Link to={`/order?productId=${product.id}`} className="block mt-8">
+          <Link to={`/order?productId=${product?.id}`} className="block mt-8">
             <Button className="w-full">
               Pesan Sekarang
             </Button>

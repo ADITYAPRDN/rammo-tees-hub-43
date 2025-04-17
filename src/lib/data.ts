@@ -1,5 +1,5 @@
 
-// Export tipe data
+// Export type definitions
 export interface Product {
   id: string;
   name: string;
@@ -36,7 +36,7 @@ export interface Customer {
   orders: string[];
 }
 
-// Export semua fungsi dari layanan
+// Export all functions from services
 export { 
   fetchProducts, fetchProductById, createProduct, updateProduct, deleteProduct 
 } from '../services/productService';

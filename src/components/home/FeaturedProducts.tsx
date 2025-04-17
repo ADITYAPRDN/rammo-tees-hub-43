@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { fetchProducts, Product } from '@/lib/data';
+import { fetchProducts, Product } from '@/services/productService';
 import { formatCurrency } from '@/lib/utils';
 
 const FeaturedProducts = () => {

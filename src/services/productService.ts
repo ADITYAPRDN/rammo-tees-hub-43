@@ -1,88 +1,90 @@
 
+import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/lib/data';
 
 // Export the Product interface again to make it directly available from this service
 export type { Product };
 
-// Menyimpan semua produk dalam memori untuk simulasi database
-let products: Product[] = [
-  {
-    id: '1',
-    name: 'Basic Cotton T-Shirt',
-    description: 'High quality 100% cotton t-shirt ideal for custom printing',
-    price: 99000,
-    image: '/t-shirt-1.png',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL']
-  },
-  {
-    id: '2',
-    name: 'Premium Polo Shirt',
-    description: 'Premium quality polo shirt with soft feel and great printability',
-    price: 150000,
-    image: '/t-shirt-2.png',
-    sizes: ['M', 'L', 'XL']
-  },
-  {
-    id: '3',
-    name: 'Long Sleeve T-Shirt',
-    description: 'Comfortable long sleeve t-shirt perfect for cooler weather',
-    price: 130000,
-    image: '/t-shirt-3.png',
-    sizes: ['S', 'M', 'L', 'XL']
-  },
-  {
-    id: '4',
-    name: 'Custom Hoodie',
-    description: 'Cozy hoodie with high quality fabric for detailed printing',
-    price: 250000,
-    image: '/hoodie-1.png',
-    sizes: ['M', 'L', 'XL', 'XXL']
+// Fetch all products from Supabase
+export const fetchProducts = async (): Promise<Product[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data as Product[];
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
   }
-];
-
-export const fetchProducts = (): Promise<Product[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve([...products]), 500);
-  });
 };
 
-export const fetchProductById = (id: string): Promise<Product | undefined> => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(products.find(product => product.id === id)), 300);
-  });
+// Fetch a specific product by ID
+export const fetchProductById = async (id: string): Promise<Product | undefined> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error) throw error;
+    return data as Product;
+  } catch (error) {
+    console.error(`Error fetching product with ID ${id}:`, error);
+    return undefined;
+  }
 };
 
-export const createProduct = (product: Omit<Product, 'id'>): Promise<Product> => {
-  return new Promise((resolve) => {
-    const newProduct: Product = {
-      ...product,
-      id: `${products.length + 1}`
-    };
-    products.push(newProduct);
-    setTimeout(() => resolve({...newProduct}), 500);
-  });
+// Create a new product
+export const createProduct = async (product: Omit<Product, 'id'>): Promise<Product> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([product])
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data as Product;
+  } catch (error) {
+    console.error('Error creating product:', error);
+    throw error;
+  }
 };
 
-export const updateProduct = (id: string, updates: Partial<Product>): Promise<Product | undefined> => {
-  return new Promise((resolve) => {
-    const index = products.findIndex(p => p.id === id);
-    if (index !== -1) {
-      products[index] = { ...products[index], ...updates };
-      setTimeout(() => resolve({...products[index]}), 300);
-    } else {
-      setTimeout(() => resolve(undefined), 300);
-    }
-  });
+// Update an existing product
+export const updateProduct = async (id: string, updates: Partial<Product>): Promise<Product | undefined> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data as Product;
+  } catch (error) {
+    console.error(`Error updating product with ID ${id}:`, error);
+    throw error;
+  }
 };
 
-export const deleteProduct = (id: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const index = products.findIndex(p => p.id === id);
-    if (index !== -1) {
-      products.splice(index, 1);
-      setTimeout(() => resolve(true), 300);
-    } else {
-      setTimeout(() => resolve(false), 300);
-    }
-  });
+// Delete a product
+export const deleteProduct = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+      
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error(`Error deleting product with ID ${id}:`, error);
+    return false;
+  }
 };
