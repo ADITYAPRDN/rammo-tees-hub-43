@@ -1,66 +1,22 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { authenticateAdmin } from '@/lib/data';
-import { useToast } from '@/components/ui/use-toast';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email.trim() || !password) {
-      toast({
-        title: "Input Tidak Lengkap",
-        description: "Email dan password diperlukan",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setLoading(true);
-    
-    try {
-      const result = await authenticateAdmin(email, password);
-      
-      if (result.success && result.token) {
-        // Store token in localStorage
-        localStorage.setItem('adminToken', result.token);
-        
-        toast({
-          title: "Login Berhasil",
-          description: "Selamat datang di dashboard admin"
-        });
-        
-        // Redirect to admin dashboard
-        navigate('/admin/dashboard');
-      } else {
-        toast({
-          title: "Login Gagal",
-          description: "Email atau password salah",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error during admin login:', error);
-      toast({
-        title: "Error",
-        description: "Terjadi kesalahan saat login. Silakan coba lagi nanti.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    await signIn(email, password);
+    setLoading(false);
   };
   
   return (
