@@ -1,3 +1,28 @@
+import React from 'react';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { useState } from "react";
+
 // Mock data for development
 export interface Product {
   id: string;
@@ -256,3 +281,194 @@ export const deleteOrder = (id: string): Promise<boolean> => {
     }
   });
 };
+
+// Define a schema for site settings form
+const siteSettingsSchema = z.object({
+  siteName: z.string().min(1, "Site name is required"),
+  siteDescription: z.string().min(1, "Site description is required"),
+  phoneNumber: z.string().min(1, "Phone number is required"),
+  whatsapp: z.string().min(1, "WhatsApp number is required"),
+  instagram: z.string().min(1, "Instagram handle is required"),
+  address: z.string().min(1, "Address is required"),
+});
+
+// Define the SiteSettings component
+const SiteSettings = () => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Mock site settings data (in a real application, this would come from an API)
+  const [siteSettings, setSiteSettings] = useState({
+    siteName: "RAMMO Clothing",
+    siteDescription: "High quality custom clothing manufacturer",
+    phoneNumber: "+62123456789",
+    whatsapp: "+62123456789",
+    instagram: "@rammo_clothing",
+    address: "Jalan Raya Clothing No. 123, Jakarta",
+  });
+
+  const form = useForm<z.infer<typeof siteSettingsSchema>>({
+    resolver: zodResolver(siteSettingsSchema),
+    defaultValues: siteSettings,
+  });
+
+  const onSubmit = (data: z.infer<typeof siteSettingsSchema>) => {
+    setIsLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setSiteSettings(data);
+      toast({
+        title: "Settings updated",
+        description: "Your site settings have been saved successfully.",
+      });
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // This would be connected to a file upload service in a real app
+    toast({
+      title: "Image uploaded",
+      description: "Your image has been uploaded successfully.",
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Site Settings</CardTitle>
+          <CardDescription>
+            Manage your website's basic information and contact details.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="siteName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Site Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="siteDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Site Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="whatsapp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>WhatsApp</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="instagram"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Instagram</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div>
+                <FormLabel className="block mb-2">Logo Upload</FormLabel>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="mb-2"
+                />
+                <p className="text-sm text-gray-500">
+                  Upload a logo for your website (recommended size: 200x60px)
+                </p>
+              </div>
+              
+              <div>
+                <FormLabel className="block mb-2">Hero Image Upload</FormLabel>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="mb-2"
+                />
+                <p className="text-sm text-gray-500">
+                  Upload a hero image for your landing page (recommended size: 1200x600px)
+                </p>
+              </div>
+              
+              <Button type="submit" className="mt-4" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Settings"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default SiteSettings;
