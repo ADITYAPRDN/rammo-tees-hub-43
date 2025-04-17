@@ -1,6 +1,6 @@
 
 import { useState, useEffect, ReactNode } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, Package, Users, BarChart2, Settings, Home, LogOut, Menu, X } from 'lucide-react';
 
@@ -12,6 +12,7 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -50,6 +51,11 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       name: 'Analitik',
       href: '/admin/analytics',
       icon: <BarChart2 className="h-5 w-5" />
+    },
+    {
+      name: 'Pengaturan',
+      href: '/admin/settings',
+      icon: <Settings className="h-5 w-5" />
     }
   ];
 
@@ -87,7 +93,9 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className="flex items-center px-4 py-3 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-md"
+                  className={`flex items-center px-4 py-3 rounded-md ${
+                    location.pathname === item.href ? 'bg-primary-50 text-primary-600' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'
+                  }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >
                   {item.icon}
@@ -117,7 +125,9 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className="flex items-center px-4 py-3 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-md"
+                  className={`flex items-center px-4 py-3 rounded-md ${
+                    location.pathname === item.href ? 'bg-primary-50 text-primary-600' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'
+                  }`}
                 >
                   {item.icon}
                   <span className="ml-3">{item.name}</span>
