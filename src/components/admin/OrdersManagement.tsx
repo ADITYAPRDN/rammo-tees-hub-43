@@ -14,6 +14,9 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose 
 } from '@/components/ui/dialog';
 
+// Import useQuery for data fetching
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 // Update import to use the reexported Order type
 import { 
   fetchOrders, updateOrderStatus, deleteOrder, type Order 
@@ -21,9 +24,6 @@ import {
 import { formatCurrency } from '@/lib/utils';
 
 const OrdersManagement = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -33,75 +33,42 @@ const OrdersManagement = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
-  useEffect(() => {
-    loadOrders();
-  }, []);
+  // Use React Query to fetch orders
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ['orders'],
+    queryFn: fetchOrders,
+  });
   
-  useEffect(() => {
-    filterOrders();
-  }, [orders, searchTerm, statusFilter, sortOrder]);
-  
-  const loadOrders = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchOrders();
-      setOrders(data);
-      setFilteredOrders(data);
-    } catch (error) {
-      console.error('Error loading orders:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Gagal memuat data pesanan",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const filterOrders = () => {
-    let result = [...orders];
-    
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      result = result.filter(order => order.status === statusFilter);
-    }
-    
-    // Apply search filter
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      result = result.filter(order => 
-        order.id.toString().includes(search) || 
-        order.customerName.toLowerCase().includes(search) ||
-        order.contact.toLowerCase().includes(search)
-      );
-    }
-    
-    // Apply sorting
-    result.sort((a, b) => {
+  // Filter orders based on search, status and sort
+  const filteredOrders = orders
+    .filter(order => 
+      (statusFilter === 'all' || order.status === statusFilter) &&
+      (searchTerm === '' || 
+        order.id.toString().includes(searchTerm.toLowerCase()) || 
+        order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.contact.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => {
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();
       return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
-    
-    setFilteredOrders(result);
-  };
   
-  const handleUpdateStatus = async (orderId: string, newStatus: 'pending' | 'processing' | 'completed') => {
-    try {
-      await updateOrderStatus(orderId, newStatus);
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ));
-      
+  // Update order status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ orderId, newStatus }: { orderId: string, newStatus: 'pending' | 'processing' | 'completed' }) => 
+      updateOrderStatus(orderId, newStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
         title: "Status Diperbarui",
-        description: `Status pesanan berhasil diubah menjadi ${newStatus}`,
+        description: "Status pesanan berhasil diubah",
       });
-      
       setIsEditDialogOpen(false);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error updating order status:', error);
       toast({
         variant: "destructive",
@@ -109,20 +76,20 @@ const OrdersManagement = () => {
         description: "Gagal memperbarui status pesanan",
       });
     }
-  };
+  });
   
-  const handleDeleteOrder = async (orderId: string) => {
-    try {
-      await deleteOrder(orderId);
-      setOrders(orders.filter(order => order.id !== orderId));
-      
+  // Delete order mutation
+  const deleteOrderMutation = useMutation({
+    mutationFn: (orderId: string) => deleteOrder(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
         title: "Pesanan Dihapus",
         description: "Pesanan berhasil dihapus dari sistem",
       });
-      
       setIsDeleteDialogOpen(false);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error deleting order:', error);
       toast({
         variant: "destructive",
@@ -130,18 +97,26 @@ const OrdersManagement = () => {
         description: "Gagal menghapus pesanan",
       });
     }
+  });
+  
+  const handleUpdateStatus = (orderId: string, newStatus: 'pending' | 'processing' | 'completed') => {
+    updateStatusMutation.mutate({ orderId, newStatus });
+  };
+  
+  const handleDeleteOrder = (orderId: string) => {
+    deleteOrderMutation.mutate(orderId);
   };
   
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Menunggu</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Menunggu</Badge>;
       case 'processing':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">Diproses</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Diproses</Badge>;
       case 'completed':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Selesai</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200">Selesai</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge>{status}</Badge>;
     }
   };
   
@@ -184,7 +159,11 @@ const OrdersManagement = () => {
           <Button variant="outline" size="icon" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
             <ArrowUpDown className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={loadOrders}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['orders'] })}
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
@@ -206,7 +185,7 @@ const OrdersManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
+                {isLoading ? (
                   Array(5).fill(0).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell colSpan={7} className="h-12">
@@ -223,13 +202,13 @@ const OrdersManagement = () => {
                 ) : (
                   filteredOrders.map((order) => (
                     <TableRow key={order.id}>
-                      <TableCell className="font-medium">#{order.id.substring(0, 6)}</TableCell>
+                      <TableCell className="font-medium">#{typeof order.id === 'string' ? order.id.substring(0, 6) : order.id}</TableCell>
                       <TableCell>{order.customerName}</TableCell>
                       <TableCell>{order.contact}</TableCell>
                       <TableCell>
                         {order.products.length > 1 
                           ? `${order.products[0].productName} +${order.products.length - 1}`
-                          : order.products[0].productName}
+                          : order.products[0]?.productName}
                       </TableCell>
                       <TableCell className="text-right">{formatCurrency(calculateOrderTotal(order))}</TableCell>
                       <TableCell>{getStatusBadge(order.status)}</TableCell>
@@ -280,7 +259,7 @@ const OrdersManagement = () => {
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>Detail Pesanan #{selectedOrder?.id.substring(0, 6)}</DialogTitle>
+            <DialogTitle>Detail Pesanan #{selectedOrder?.id.toString().substring(0, 6)}</DialogTitle>
           </DialogHeader>
           
           {selectedOrder && (
@@ -296,7 +275,7 @@ const OrdersManagement = () => {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">Status</p>
-                  <p>{getStatusBadge(selectedOrder.status)}</p>
+                  <div>{getStatusBadge(selectedOrder.status)}</div>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">Tanggal</p>
@@ -375,7 +354,8 @@ const OrdersManagement = () => {
           {selectedOrder && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <p className="text-sm font-medium">Status Saat Ini: {getStatusBadge(selectedOrder.status)}</p>
+                <p className="text-sm font-medium">Status Saat Ini:</p>
+                <div className="mb-2">{getStatusBadge(selectedOrder.status)}</div>
                 <p className="text-sm">Pilih status baru:</p>
                 <div className="flex flex-col space-y-2">
                   <Button 
@@ -383,7 +363,7 @@ const OrdersManagement = () => {
                     onClick={() => handleUpdateStatus(selectedOrder.id, 'pending')}
                     className="justify-start"
                   >
-                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 mr-2">
+                    <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 mr-2">
                       Menunggu
                     </Badge>
                     Belum diproses
@@ -394,7 +374,7 @@ const OrdersManagement = () => {
                     onClick={() => handleUpdateStatus(selectedOrder.id, 'processing')}
                     className="justify-start"
                   >
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 mr-2">
+                    <Badge className="bg-blue-100 text-blue-800 border-blue-200 mr-2">
                       Diproses
                     </Badge>
                     Sedang diproses
@@ -405,7 +385,7 @@ const OrdersManagement = () => {
                     onClick={() => handleUpdateStatus(selectedOrder.id, 'completed')}
                     className="justify-start"
                   >
-                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 mr-2">
+                    <Badge className="bg-green-100 text-green-800 border-green-200 mr-2">
                       Selesai
                     </Badge>
                     Pesanan selesai
@@ -435,7 +415,7 @@ const OrdersManagement = () => {
           
           {selectedOrder && (
             <div className="border rounded-md p-4 bg-red-50 border-red-100 text-red-800">
-              <p><strong>ID:</strong> #{selectedOrder.id.substring(0, 6)}</p>
+              <p><strong>ID:</strong> #{selectedOrder.id.toString().substring(0, 6)}</p>
               <p><strong>Pelanggan:</strong> {selectedOrder.customerName}</p>
               <p><strong>Produk:</strong> {selectedOrder.products.map(p => p.productName).join(', ')}</p>
             </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 import { createOrder } from "@/services/orderService";
-// Update import to use the reexported Product type
 import { type Product, fetchProductById } from "@/services/productService";
 import { formatCurrency } from "@/lib/utils";
 
@@ -44,7 +42,6 @@ const OrderForm = () => {
           const productData = await fetchProductById(productId);
           if (productData) {
             setProduct(productData);
-            // Set default size
             setFormData(prev => ({
               ...prev,
               size: productData.sizes[0] || ''
@@ -98,7 +95,6 @@ const OrderForm = () => {
       return;
     }
     
-    // Validasi form
     if (!formData.name || !formData.email || !formData.phone || !formData.size || formData.quantity < 1) {
       toast({
         variant: "destructive",
@@ -111,11 +107,10 @@ const OrderForm = () => {
     setSubmitting(true);
     
     try {
-      // Buat pesanan
       const order = await createOrder({
         customerId: 'guest',
         customerName: formData.name,
-        contact: formData.email || formData.phone, // Gunakan email atau telepon sebagai kontak utama
+        contact: formData.email || formData.phone,
         products: [
           {
             productId: product.id,
@@ -134,7 +129,6 @@ const OrderForm = () => {
         description: "Pesanan Anda telah diterima dan sedang diproses",
       });
       
-      // Reset form
       setFormData({
         name: '',
         email: '',
@@ -145,7 +139,6 @@ const OrderForm = () => {
         notes: '',
       });
       
-      // Redirect ke halaman sukses atau kembali ke halaman produk
       navigate(`/customer?contact=${encodeURIComponent(formData.email || formData.phone)}`);
     } catch (error) {
       console.error('Error submitting order:', error);
