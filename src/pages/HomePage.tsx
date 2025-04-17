@@ -5,7 +5,7 @@ import ContactSection from '@/components/home/ContactSection';
 
 const HomePage = () => {
   return (
-    <div>
+    <div className="space-y-16 animate-fade-in">
       <Hero />
       <FeaturedProducts />
       <ContactSection />

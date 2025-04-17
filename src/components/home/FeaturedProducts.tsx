@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,9 +27,9 @@ const FeaturedProducts = () => {
   return (
     <section className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900">Produk Unggulan Kami</h2>
-          <p className="mt-4 text-lg text-gray-600">
+        <div className="text-center mb-12 animate-fade-in">
+          <h2 className="text-3xl font-bold text-gray-900 animate-slide-up">Produk Unggulan Kami</h2>
+          <p className="mt-4 text-lg text-gray-600 animate-slide-up delay-150">
             Berbagai pilihan kaos berkualitas tinggi untuk kebutuhan menyablon Anda
           </p>
         </div>
@@ -49,8 +48,12 @@ const FeaturedProducts = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.map((product) => (
-              <Card key={product.id} className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+            {products.map((product, index) => (
+              <Card 
+                key={product.id} 
+                className="overflow-hidden transition-all duration-300 hover:shadow-lg animate-slide-up"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
                 <img
                   src={product.image}
                   alt={product.name}
@@ -80,9 +83,9 @@ const FeaturedProducts = () => {
           </div>
         )}
 
-        <div className="mt-12 text-center">
+        <div className="mt-12 text-center animate-fade-in delay-500">
           <Link to="/products">
-            <Button variant="outline" className="font-medium">
+            <Button variant="outline" className="font-medium hover:scale-105 transition-transform">
               Lihat Semua Produk
             </Button>
           </Link>
