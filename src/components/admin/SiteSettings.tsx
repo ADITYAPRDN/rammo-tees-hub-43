@@ -8,24 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { updateSiteSettings, getSiteSettings } from '@/lib/data';
-
-interface SiteSettingsData {
-  siteName: string;
-  siteDescription: string;
-  phoneNumber: string;
-  whatsapp: string;
-  instagram: string;
-  address: string;
-}
+import { updateSiteSettings, getSiteSettings } from '@/services/settingsService';
+import { SiteSettings as SiteSettingsType } from '@/services/settingsService';
 
 const SiteSettings = () => {
-  const [settings, setSettings] = useState<SiteSettingsData>({
+  const [settings, setSettings] = useState<SiteSettingsType>({
     siteName: '',
     siteDescription: '',
     phoneNumber: '',
     whatsapp: '',
     instagram: '',
+    tiktok: '',
     address: ''
   });
 
@@ -72,9 +65,9 @@ const SiteSettings = () => {
     } catch (error) {
       console.error('Error updating site settings:', error);
       toast({
-        title: 'Error',
-        description: 'Gagal memperbarui pengaturan situs',
-        variant: 'destructive'
+        variant: "destructive",
+        title: "Error",
+        description: "Gagal memperbarui pengaturan situs",
       });
     } finally {
       setIsLoading(false);
@@ -186,6 +179,16 @@ const SiteSettings = () => {
                     value={settings.instagram}
                     onChange={handleChange}
                     placeholder="@username_instagram"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tiktok">TikTok</Label>
+                  <Input
+                    id="tiktok"
+                    name="tiktok"
+                    value={settings.tiktok}
+                    onChange={handleChange}
+                    placeholder="@username_tiktok"
                   />
                 </div>
               </CardContent>

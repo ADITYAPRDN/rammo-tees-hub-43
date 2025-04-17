@@ -1,10 +1,55 @@
 
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Instagram, Share2, MapPin } from 'lucide-react';
+import { getSiteSettings } from '@/services/settingsService';
+import type { SiteSettings } from '@/services/settingsService';
 
 const ContactSection = () => {
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await getSiteSettings();
+        setSettings(data);
+      } catch (error) {
+        console.error('Error fetching site settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg p-6 shadow-md animate-pulse">
+                <div className="h-12 w-12 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-3"></div>
+                <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,17 +69,17 @@ const ContactSection = () => {
               <h3 className="text-xl font-semibold mb-2">WhatsApp</h3>
               <p className="text-gray-600 mb-4">Hubungi kami langsung melalui WhatsApp untuk layanan cepat</p>
               <a
-                href="https://wa.me/6281234567890"
+                href={`https://wa.me/${settings?.whatsapp.replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-flex items-center text-primary-600 hover:text-primary-700"
               >
-                +62 812-3456-7890
+                {settings?.whatsapp}
               </a>
               <Button 
                 variant="outline" 
                 className="mt-4"
-                onClick={() => window.open('https://wa.me/6281234567890', '_blank', 'noopener,noreferrer')}
+                onClick={() => window.open(`https://wa.me/${settings?.whatsapp.replace(/[^0-9]/g, '')}`, '_blank', 'noopener,noreferrer')}
               >
                 Chat Sekarang
               </Button>
@@ -50,20 +95,20 @@ const ContactSection = () => {
               <p className="text-gray-600 mb-4">Ikuti kami di media sosial untuk update dan inspirasi desain</p>
               <div className="space-y-2">
                 <a
-                  href="https://instagram.com/rammo_tshirts"
+                  href={`https://instagram.com/${settings?.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-primary-600 hover:text-primary-700"
                 >
-                  Instagram: @rammo_tshirts
+                  Instagram: {settings?.instagram}
                 </a>
                 <a
-                  href="https://tiktok.com/@rammo_tshirts"
+                  href={`https://tiktok.com/${settings?.tiktok}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-primary-600 hover:text-primary-700"
                 >
-                  TikTok: @rammo_tshirts
+                  TikTok: {settings?.tiktok}
                 </a>
               </div>
             </CardContent>
@@ -77,8 +122,7 @@ const ContactSection = () => {
               <h3 className="text-xl font-semibold mb-2">Lokasi</h3>
               <p className="text-gray-600 mb-4">Kunjungi workshop kami di:</p>
               <address className="not-italic text-gray-700 mb-4">
-                Jl. Sablon Kreatif No. 123<br />
-                Jakarta Selatan, 12345
+                {settings?.address}
               </address>
               <Link to="/contact">
                 <Button variant="outline">Lihat di Peta</Button>

@@ -13,7 +13,9 @@ import { Search, RefreshCw, Eye, Edit, Trash2, Filter, ArrowUpDown } from 'lucid
 import { 
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose 
 } from '@/components/ui/dialog';
-import { fetchOrders, updateOrderStatus, deleteOrder, Order } from '@/lib/data';
+import { 
+  fetchOrders, updateOrderStatus, deleteOrder, Order 
+} from '@/services/orderService';
 import { formatCurrency } from '@/lib/utils';
 
 const OrdersManagement = () => {

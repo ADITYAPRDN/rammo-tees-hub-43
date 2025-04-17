@@ -10,13 +10,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Search, Edit, Trash2, Image, Save, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Image, Save, X, Upload } from 'lucide-react';
 import { 
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger 
 } from '@/components/ui/dialog';
 import { 
   fetchProducts, createProduct, updateProduct, deleteProduct, Product 
-} from '@/lib/data';
+} from '@/services/productService';
 import { formatCurrency } from '@/lib/utils';
 
 const ProductsManagement = () => {
@@ -30,6 +30,8 @@ const ProductsManagement = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   // Form state
   const [formState, setFormState] = useState({
@@ -91,6 +93,8 @@ const ProductsManagement = () => {
       sizes: [],
       stock: 0
     });
+    setImagePreview(null);
+    setImageFile(null);
   };
   
   const handleOpenAddDialog = () => {
@@ -109,6 +113,7 @@ const ProductsManagement = () => {
       sizes: product.sizes,
       stock: product.stock || 0
     });
+    setImagePreview(product.image);
     setIsEditDialogOpen(true);
   };
   
@@ -125,6 +130,18 @@ const ProductsManagement = () => {
     }));
   };
   
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSizeChange = (size: string, checked: boolean) => {
     setFormState(prev => ({
       ...prev,
@@ -174,15 +191,33 @@ const ProductsManagement = () => {
     return true;
   };
   
+  // Fungsi simulasi upload gambar
+  const uploadImage = async (file: File): Promise<string> => {
+    // Dalam implementasi nyata, ini akan mengunggah ke server
+    // Untuk sekarang, kita gunakan URL.createObjectURL untuk simulasi
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Gunakan imagePreview sebagai URL gambar
+        resolve(imagePreview || '/placeholder.svg');
+      }, 500);
+    });
+  };
+  
   const handleCreateProduct = async () => {
     if (!validateForm()) return;
     
     try {
+      // Proses upload gambar jika ada
+      let imageUrl = formState.image;
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      }
+      
       const newProduct = await createProduct({
         name: formState.name,
         description: formState.description,
         price: formState.price,
-        image: formState.image || 'https://via.placeholder.com/150',
+        image: imageUrl || '/placeholder.svg',
         sizes: formState.sizes,
         stock: formState.stock
       });
@@ -210,18 +245,26 @@ const ProductsManagement = () => {
     if (!validateForm() || !selectedProduct) return;
     
     try {
+      // Proses upload gambar jika ada
+      let imageUrl = formState.image;
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      }
+      
       const updatedProduct = await updateProduct(selectedProduct.id, {
         name: formState.name,
         description: formState.description,
         price: formState.price,
-        image: formState.image,
+        image: imageUrl,
         sizes: formState.sizes,
         stock: formState.stock
       });
       
-      setProducts(products.map(product => 
-        product.id === selectedProduct.id ? updatedProduct : product
-      ));
+      if (updatedProduct) {
+        setProducts(products.map(product => 
+          product.id === selectedProduct.id ? updatedProduct : product
+        ));
+      }
       
       toast({
         title: "Produk Diperbarui",
@@ -262,7 +305,7 @@ const ProductsManagement = () => {
       });
     }
   };
-  
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -423,7 +466,52 @@ const ProductsManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="image">URL Gambar</Label>
+              <Label>Gambar Produk</Label>
+              <div className="flex items-center gap-2">
+                <Label 
+                  htmlFor="image-upload" 
+                  className="cursor-pointer flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md py-2 px-4 w-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  <span>Pilih Gambar</span>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                </Label>
+              </div>
+              
+              {imagePreview && (
+                <div className="mt-2 border rounded p-2 flex flex-col items-center">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="h-32 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }}
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="mt-2 text-red-500" 
+                    onClick={() => {
+                      setImagePreview(null);
+                      setImageFile(null);
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Hapus Gambar
+                  </Button>
+                </div>
+              )}
+              
+              <p className="text-xs text-gray-500">
+                Alternatif: Masukkan URL gambar
+              </p>
               <Input
                 id="image"
                 name="image"
@@ -431,18 +519,6 @@ const ProductsManagement = () => {
                 onChange={handleInputChange}
                 placeholder="Masukkan URL gambar produk"
               />
-              {formState.image && (
-                <div className="mt-2 border rounded p-2 flex items-center justify-center">
-                  <img
-                    src={formState.image}
-                    alt="Preview"
-                    className="h-32 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder.svg';
-                    }}
-                  />
-                </div>
-              )}
             </div>
             
             <div className="space-y-2">
@@ -540,25 +616,61 @@ const ProductsManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-image">URL Gambar</Label>
-              <Input
-                id="edit-image"
-                name="image"
-                value={formState.image}
-                onChange={handleInputChange}
-              />
-              {formState.image && (
-                <div className="mt-2 border rounded p-2 flex items-center justify-center">
+              <Label>Gambar Produk</Label>
+              <div className="flex items-center gap-2">
+                <Label 
+                  htmlFor="edit-image-upload" 
+                  className="cursor-pointer flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md py-2 px-4 w-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  <span>Ganti Gambar</span>
+                  <Input
+                    id="edit-image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                </Label>
+              </div>
+              
+              {imagePreview && (
+                <div className="mt-2 border rounded p-2 flex flex-col items-center">
                   <img
-                    src={formState.image}
+                    src={imagePreview}
                     alt="Preview"
                     className="h-32 object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/placeholder.svg';
                     }}
                   />
+                  {imageFile && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-2 text-red-500" 
+                      onClick={() => {
+                        // Kembalikan ke URL gambar asli
+                        setImagePreview(formState.image);
+                        setImageFile(null);
+                      }}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Batalkan Perubahan
+                    </Button>
+                  )}
                 </div>
               )}
+              
+              <p className="text-xs text-gray-500">
+                Alternatif: Masukkan URL gambar
+              </p>
+              <Input
+                id="edit-image"
+                name="image"
+                value={formState.image}
+                onChange={handleInputChange}
+              />
             </div>
             
             <div className="space-y-2">

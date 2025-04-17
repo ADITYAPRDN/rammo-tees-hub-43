@@ -1,285 +1,376 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { fetchProducts, createOrder, Product } from '@/lib/data';
-import { isValidContact } from '@/lib/utils';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+
+import { createOrder } from "@/services/orderService";
+import { Product, fetchProductById } from "@/services/productService";
+import { formatCurrency } from "@/lib/utils";
 
 const OrderForm = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const productId = searchParams.get('productId');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   
-  // Form state
-  const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
-  const [productId, setProductId] = useState('');
-  const [size, setSize] = useState('');
-  const [quantity, setQuantity] = useState(1);
-  const [notes, setNotes] = useState('');
-
-  // Selected product info
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    size: '',
+    quantity: 1,
+    notes: '',
+  });
   
-  const { toast } = useToast();
-
   useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const fetchedProducts = await fetchProducts();
-        setProducts(fetchedProducts);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        setLoading(false);
+    const fetchProduct = async () => {
+      if (productId) {
+        setLoading(true);
+        try {
+          const productData = await fetchProductById(productId);
+          if (productData) {
+            setProduct(productData);
+            // Set default size
+            setFormData(prev => ({
+              ...prev,
+              size: productData.sizes[0] || ''
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching product:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Gagal memuat data produk",
+          });
+        } finally {
+          setLoading(false);
+        }
       }
     };
-
-    getProducts();
-  }, []);
-
-  useEffect(() => {
-    // Update selected product when productId changes
-    if (productId) {
-      const product = products.find(p => p.id === productId) || null;
-      setSelectedProduct(product);
-      
-      // Reset size when product changes
-      setSize('');
-    } else {
-      setSelectedProduct(null);
-    }
-  }, [productId, products]);
-
+    
+    fetchProduct();
+  }, [productId, toast]);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      setQuantity(value);
-    }
+    let value = parseInt(e.target.value);
+    if (isNaN(value)) value = 1;
+    setFormData(prev => ({ ...prev, quantity: value }));
   };
-
-  const validateForm = (): boolean => {
-    if (!name.trim()) {
-      toast({
-        title: "Nama Diperlukan",
-        description: "Silakan masukkan nama Anda",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    if (!contact.trim() || !isValidContact(contact)) {
-      toast({
-        title: "Kontak Tidak Valid",
-        description: "Silakan masukkan email atau nomor WhatsApp yang valid",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    if (!productId) {
-      toast({
-        title: "Produk Diperlukan",
-        description: "Silakan pilih produk yang ingin dipesan",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    if (!size) {
-      toast({
-        title: "Ukuran Diperlukan",
-        description: "Silakan pilih ukuran yang diinginkan",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    return true;
+  
+  const calculateTotal = () => {
+    if (!product) return 0;
+    return product.price * formData.quantity;
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    if (!product) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Tidak ada produk yang dipilih",
+      });
       return;
     }
-
+    
+    // Validasi form
+    if (!formData.name || !formData.email || !formData.phone || !formData.size || formData.quantity < 1) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Mohon lengkapi semua field yang diperlukan",
+      });
+      return;
+    }
+    
     setSubmitting(true);
-
+    
     try {
-      if (!selectedProduct) {
-        throw new Error("Product not found");
-      }
-      
-      const order = {
-        customerId: "new", // This would be replaced with actual customer ID in a real app
-        customerName: name,
-        contact,
+      // Buat pesanan
+      const order = await createOrder({
+        customerId: 'guest',
+        customerName: formData.name,
+        contact: formData.email || formData.phone, // Gunakan email atau telepon sebagai kontak utama
         products: [
           {
-            productId,
-            productName: selectedProduct.name,
-            size,
-            quantity,
-            price: selectedProduct.price
+            productId: product.id,
+            productName: product.name,
+            size: formData.size,
+            quantity: formData.quantity,
+            price: product.price
           }
         ],
-        notes,
-        status: 'pending' as const
-      };
-
-      await createOrder(order);
+        notes: formData.notes,
+        status: 'pending'
+      });
       
       toast({
-        title: "Pesanan Berhasil Dibuat",
-        description: "Tim kami akan segera menghubungi Anda",
+        title: "Pesanan Berhasil",
+        description: "Pesanan Anda telah diterima dan sedang diproses",
       });
-
-      // Reset form
-      setName('');
-      setContact('');
-      setProductId('');
-      setSize('');
-      setQuantity(1);
-      setNotes('');
       
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        size: '',
+        quantity: 1,
+        notes: '',
+      });
+      
+      // Redirect ke halaman sukses atau kembali ke halaman produk
+      navigate(`/customer?contact=${encodeURIComponent(formData.email || formData.phone)}`);
     } catch (error) {
       console.error('Error submitting order:', error);
       toast({
+        variant: "destructive",
         title: "Error",
-        description: "Terjadi kesalahan saat memproses pesanan Anda. Silakan coba lagi nanti.",
-        variant: "destructive"
+        description: "Gagal mengirim pesanan. Silakan coba lagi.",
       });
     } finally {
       setSubmitting(false);
     }
   };
-
+  
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6">Form Pemesanan</h2>
-      
+    <div>
       <form onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          {/* Personal Information */}
-          <div>
-            <h3 className="text-lg font-medium mb-4">Informasi Pribadi</h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informasi Pribadi</CardTitle>
+                <CardDescription>
+                  Masukkan informasi kontak Anda
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nama Lengkap</Label>
                   <Input 
                     id="name" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Masukkan nama lengkap"
+                    name="name" 
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Masukkan nama lengkap Anda" 
                     required
                   />
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contact">Email / Nomor WhatsApp</Label>
-                <Input 
-                  id="contact" 
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  placeholder="contoh@email.com atau 0812xxxxxxxx"
-                  required
-                />
-                <p className="text-xs text-gray-500">
-                  Kami akan menggunakan ini untuk menghubungi Anda terkait pesanan
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Order Details */}
-          <div className="pt-4">
-            <h3 className="text-lg font-medium mb-4">Detail Pesanan</h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="product">Pilih Produk</Label>
-                <Select 
-                  value={productId} 
-                  onValueChange={setProductId}
-                  disabled={loading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih produk" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {selectedProduct && (
-                <>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="size">Ukuran</Label>
-                    <Select value={size} onValueChange={setSize}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih ukuran" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {selectedProduct.sizes.map((size) => (
-                          <SelectItem key={size} value={size}>
-                            {size}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity">Jumlah</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input 
-                      id="quantity"
-                      type="number"
-                      min="1"
-                      value={quantity}
-                      onChange={handleQuantityChange}
+                      id="email" 
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Masukkan email Anda"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Nomor Telepon</Label>
+                    <Input 
+                      id="phone" 
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Masukkan nomor telepon Anda" 
                       required
                     />
                   </div>
-                </>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="notes">Catatan Khusus</Label>
-                <Textarea 
-                  id="notes" 
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Deskripsi desain, warna, atau informasi tambahan lainnya"
-                  rows={4}
-                />
-              </div>
-            </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="address">Alamat (Opsional)</Label>
+                  <Textarea 
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="Masukkan alamat lengkap Anda" 
+                    rows={3} 
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Detail Pesanan</CardTitle>
+                <CardDescription>
+                  Masukkan spesifikasi pesanan Anda
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {loading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                  </div>
+                ) : product ? (
+                  <>
+                    <div className="flex items-center space-x-4">
+                      <div className="h-16 w-16 bg-gray-100 rounded overflow-hidden">
+                        <img 
+                          src={product.image} 
+                          alt={product.name} 
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{product.name}</h3>
+                        <p className="text-sm text-gray-500">{formatCurrency(product.price)}</p>
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="size">Ukuran</Label>
+                        <Select 
+                          value={formData.size} 
+                          onValueChange={(value) => handleSelectChange('size', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih ukuran" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {product.sizes.map((size) => (
+                              <SelectItem key={size} value={size}>{size}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quantity">Jumlah</Label>
+                        <Input 
+                          id="quantity" 
+                          name="quantity"
+                          type="number"
+                          min="1"
+                          value={formData.quantity}
+                          onChange={handleQuantityChange}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-gray-500">Tidak ada produk yang dipilih.</p>
+                    <Button 
+                      variant="secondary"
+                      className="mt-2"
+                      onClick={() => navigate('/products')}
+                    >
+                      Pilih Produk
+                    </Button>
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Catatan Tambahan (Opsional)</Label>
+                  <Textarea 
+                    id="notes"
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    placeholder="Masukkan catatan atau permintaan khusus" 
+                    rows={3} 
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
           
-          {/* Submission */}
-          <div className="pt-6">
-            <Button 
-              type="submit" 
-              className="w-full bg-primary-500 hover:bg-primary-600"
-              disabled={submitting}
-            >
-              {submitting ? 'Memproses...' : 'Kirim Pesanan'}
-            </Button>
-            <p className="text-xs text-center text-gray-500 mt-2">
-              Dengan mengirim, Anda setuju untuk dihubungi oleh tim kami terkait pesanan ini
-            </p>
+          <div>
+            <Card className="sticky top-4">
+              <CardHeader>
+                <CardTitle>Ringkasan Pesanan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {product ? (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Produk</span>
+                      <span>{product.name}</span>
+                    </div>
+                    
+                    {formData.size && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">Ukuran</span>
+                        <Badge variant="outline">{formData.size}</Badge>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Jumlah</span>
+                      <span>{formData.quantity} pcs</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Harga Satuan</span>
+                      <span>{formatCurrency(product.price)}</span>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Total</span>
+                      <span className="font-bold text-lg">{formatCurrency(calculateTotal())}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-gray-500">Pilih produk terlebih dahulu</p>
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  className="w-full" 
+                  disabled={!product || submitting}
+                  type="submit"
+                >
+                  {submitting ? 'Memproses...' : 'Kirim Pesanan'}
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
         </div>
       </form>
