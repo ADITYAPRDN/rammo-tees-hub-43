@@ -7,29 +7,10 @@ export type { Order, OrderItem };
 
 export const fetchOrders = async (): Promise<Order[]> => {
   try {
-    // Fetch orders from Supabase with explicit column selection
+    // Fetch orders from Supabase without explicitly listing columns that might not exist in the type definition
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select(`
-        id, 
-        customer_id, 
-        notes, 
-        status, 
-        created_at, 
-        updated_at,
-        customer_name,
-        contact,
-        order_items (
-          id, 
-          order_id, 
-          product_id, 
-          product_name, 
-          size, 
-          quantity, 
-          price,
-          created_at
-        )
-      `);
+      .select('*, order_items(*)');
     
     if (ordersError) throw ordersError;
     
@@ -60,26 +41,7 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
   try {
     const { data: order, error } = await supabase
       .from('orders')
-      .select(`
-        id, 
-        customer_id, 
-        notes, 
-        status, 
-        created_at, 
-        updated_at,
-        customer_name,
-        contact,
-        order_items (
-          id, 
-          order_id, 
-          product_id, 
-          product_name, 
-          size, 
-          quantity, 
-          price,
-          created_at
-        )
-      `)
+      .select('*, order_items(*)')
       .eq('id', id)
       .single();
     
@@ -111,26 +73,7 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
   try {
     const { data: orders, error } = await supabase
       .from('orders')
-      .select(`
-        id, 
-        customer_id, 
-        notes, 
-        status, 
-        created_at, 
-        updated_at,
-        customer_name,
-        contact,
-        order_items (
-          id, 
-          order_id, 
-          product_id, 
-          product_name, 
-          size, 
-          quantity, 
-          price,
-          created_at
-        )
-      `)
+      .select('*, order_items(*)')
       .eq('contact', contactInfo);
     
     if (error) throw error;
@@ -213,26 +156,7 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
       .from('orders')
       .update({ status })
       .eq('id', orderId)
-      .select(`
-        id, 
-        customer_id, 
-        notes, 
-        status, 
-        created_at, 
-        updated_at,
-        customer_name,
-        contact,
-        order_items (
-          id, 
-          order_id, 
-          product_id, 
-          product_name, 
-          size, 
-          quantity, 
-          price,
-          created_at
-        )
-      `)
+      .select('*, order_items(*)')
       .single();
     
     if (error) throw error;
