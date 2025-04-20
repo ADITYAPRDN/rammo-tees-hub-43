@@ -1,4 +1,3 @@
-
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,12 +24,12 @@ const ContactPage = () => {
                     <h3 className="text-lg font-semibold mb-1">WhatsApp</h3>
                     <p className="text-gray-600 mb-2">Kontak kami melalui WhatsApp untuk respons cepat</p>
                     <a
-                      href="https://wa.me/6281234567890"
+                      href="https://wa.link/y2tfq3"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary-600 hover:text-primary-700 font-medium"
                     >
-                      +62 812-3456-7890
+                      +62 852-1829-5384
                     </a>
                   </div>
                 </div>
@@ -41,12 +40,12 @@ const ContactPage = () => {
                     <h3 className="text-lg font-semibold mb-1">Instagram</h3>
                     <p className="text-gray-600 mb-2">Ikuti kami untuk update dan inspirasi desain</p>
                     <a
-                      href="https://instagram.com/rammo_tshirts"
+                      href="https://www.instagram.com/rammoclothing/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary-600 hover:text-primary-700 font-medium"
                     >
-                      @rammo_tshirts
+                      @rammoclothing
                     </a>
                   </div>
                 </div>
@@ -57,12 +56,12 @@ const ContactPage = () => {
                     <h3 className="text-lg font-semibold mb-1">TikTok</h3>
                     <p className="text-gray-600 mb-2">Lihat konten kreatif dan proses produksi kami</p>
                     <a
-                      href="https://tiktok.com/@rammo_tshirts"
+                      href="https://www.tiktok.com/@rammoclothing"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary-600 hover:text-primary-700 font-medium"
                     >
-                      @rammo_tshirts
+                      @rammoclothing
                     </a>
                   </div>
                 </div>
@@ -72,13 +71,12 @@ const ContactPage = () => {
                   <div>
                     <h3 className="text-lg font-semibold mb-1">Alamat Workshop</h3>
                     <address className="not-italic text-gray-600 mb-2">
-                      Jl. Sablon Kreatif No. 123<br />
-                      Jakarta Selatan, 12345<br />
+                      Workshop Rammo<br />
+                      Jl. R.A Kartini No.1, Ngringin Condongcatur<br />
+                      Kec. Depok, Kabupaten Sleman<br />
+                      Daerah Istimewa Yogyakarta 55281<br />
                       Indonesia
                     </address>
-                    <p className="text-gray-600">
-                      Buka: Senin - Sabtu, 09:00 - 17:00
-                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -87,12 +85,12 @@ const ContactPage = () => {
           
           <div className="h-96 md:h-auto">
             <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.36633952333!2d106.7588024673722!3d-6.229386715321705!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x5371bf0fdad786a2!2sJakarta%20Selatan%2C%20Kota%20Jakarta%20Selatan%2C%20Daerah%20Khusus%20Ibukota%20Jakarta!5e0!3m2!1sid!2sid!4v1713936069971!5m2!1sid!2sid" 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.1675667538164!2d110.40721797497645!3d-7.7676318922722175!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a59a885892233%3A0x564488b6dc3d587d!2sRAMMO!5e0!3m2!1sen!2sid!4v1711595010041!5m2!1sen!2sid"
               className="w-full h-full border-0 rounded-lg shadow-md"
               allowFullScreen
               loading="lazy" 
               referrerPolicy="no-referrer-when-downgrade"
-              title="RAMMO T-Shirts Location"
+              title="RAMMO Workshop Location"
             ></iframe>
           </div>
         </div>

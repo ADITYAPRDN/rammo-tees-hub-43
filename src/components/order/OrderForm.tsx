@@ -95,7 +95,7 @@ const OrderForm = () => {
       return;
     }
     
-    if (!formData.name || !formData.email || !formData.phone || !formData.size || formData.quantity < 1) {
+    if (!formData.name || !formData.phone || !formData.size || formData.quantity < 1) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -110,7 +110,7 @@ const OrderForm = () => {
       const order = await createOrder({
         customerId: 'guest',
         customerName: formData.name,
-        contact: formData.email || formData.phone,
+        contact: formData.phone,
         products: [
           {
             productId: product.id,
@@ -129,17 +129,7 @@ const OrderForm = () => {
         description: "Pesanan Anda telah diterima dan sedang diproses",
       });
       
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        size: '',
-        quantity: 1,
-        notes: '',
-      });
-      
-      navigate(`/customer?contact=${encodeURIComponent(formData.email || formData.phone)}`);
+      navigate(`/customer?contact=${encodeURIComponent(formData.phone)}`);
     } catch (error) {
       console.error('Error submitting order:', error);
       toast({
