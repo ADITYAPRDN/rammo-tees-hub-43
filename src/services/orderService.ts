@@ -7,10 +7,29 @@ export type { Order, OrderItem };
 
 export const fetchOrders = async (): Promise<Order[]> => {
   try {
-    // Fetch orders from Supabase
+    // Fetch orders from Supabase with explicit column selection
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select('*, order_items(*)');
+      .select(`
+        id, 
+        customer_id, 
+        notes, 
+        status, 
+        created_at, 
+        updated_at,
+        customer_name,
+        contact,
+        order_items (
+          id, 
+          order_id, 
+          product_id, 
+          product_name, 
+          size, 
+          quantity, 
+          price,
+          created_at
+        )
+      `);
     
     if (ordersError) throw ordersError;
     
@@ -23,7 +42,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
       notes: order.notes || '',
       status: order.status as Order['status'],
       createdAt: order.created_at,
-      products: order.order_items.map((item: any) => ({
+      products: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
         productName: item.product_name || 'Product', // Fallback name
         size: item.size,
@@ -41,7 +60,26 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
   try {
     const { data: order, error } = await supabase
       .from('orders')
-      .select('*, order_items(*)')
+      .select(`
+        id, 
+        customer_id, 
+        notes, 
+        status, 
+        created_at, 
+        updated_at,
+        customer_name,
+        contact,
+        order_items (
+          id, 
+          order_id, 
+          product_id, 
+          product_name, 
+          size, 
+          quantity, 
+          price,
+          created_at
+        )
+      `)
       .eq('id', id)
       .single();
     
@@ -55,7 +93,7 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
       notes: order.notes || '',
       status: order.status as Order['status'],
       createdAt: order.created_at,
-      products: order.order_items.map((item: any) => ({
+      products: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
         productName: item.product_name || 'Product',
         size: item.size,
@@ -73,7 +111,26 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
   try {
     const { data: orders, error } = await supabase
       .from('orders')
-      .select('*, order_items(*)')
+      .select(`
+        id, 
+        customer_id, 
+        notes, 
+        status, 
+        created_at, 
+        updated_at,
+        customer_name,
+        contact,
+        order_items (
+          id, 
+          order_id, 
+          product_id, 
+          product_name, 
+          size, 
+          quantity, 
+          price,
+          created_at
+        )
+      `)
       .eq('contact', contactInfo);
     
     if (error) throw error;
@@ -86,7 +143,7 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
       notes: order.notes || '',
       status: order.status as Order['status'],
       createdAt: order.created_at,
-      products: order.order_items.map((item: any) => ({
+      products: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
         productName: item.product_name || 'Product',
         size: item.size,
@@ -156,7 +213,26 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
       .from('orders')
       .update({ status })
       .eq('id', orderId)
-      .select('*, order_items(*)')
+      .select(`
+        id, 
+        customer_id, 
+        notes, 
+        status, 
+        created_at, 
+        updated_at,
+        customer_name,
+        contact,
+        order_items (
+          id, 
+          order_id, 
+          product_id, 
+          product_name, 
+          size, 
+          quantity, 
+          price,
+          created_at
+        )
+      `)
       .single();
     
     if (error) throw error;
@@ -169,7 +245,7 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
       notes: data.notes || '',
       status: data.status as Order['status'],
       createdAt: data.created_at,
-      products: data.order_items.map((item: any) => ({
+      products: (data.order_items || []).map((item: any) => ({
         productId: item.product_id,
         productName: item.product_name || 'Product',
         size: item.size,
