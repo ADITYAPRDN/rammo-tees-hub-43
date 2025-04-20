@@ -1,6 +1,5 @@
-
 import { Link } from 'react-router-dom';
-import { Instagram, Share2, MessageCircle, MapPin } from 'lucide-react';
+import { Instagram, MessageCircle, Share2, MapPin } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -69,41 +68,46 @@ const Footer = () => {
               <li className="flex items-center">
                 <MessageCircle className="h-5 w-5 text-primary-500 mr-2" />
                 <a
-                  href="https://wa.me/6281234567890"
+                  href="https://wa.link/y2tfq3"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-gray-600 hover:text-primary-500"
                 >
-                  +62 812-3456-7890
+                  +62 852-1829-5384
                 </a>
               </li>
               <li className="flex items-center">
                 <Instagram className="h-5 w-5 text-primary-500 mr-2" />
                 <a
-                  href="https://instagram.com/rammo_tshirts"
+                  href="https://www.instagram.com/rammoclothing/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-gray-600 hover:text-primary-500"
                 >
-                  @rammo_tshirts
+                  @rammoclothing
                 </a>
               </li>
               <li className="flex items-center">
                 <Share2 className="h-5 w-5 text-primary-500 mr-2" />
                 <a
-                  href="https://tiktok.com/@rammo_tshirts"
+                  href="https://www.tiktok.com/@rammoclothing"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-gray-600 hover:text-primary-500"
                 >
-                  @rammo_tshirts
+                  @rammoclothing
                 </a>
               </li>
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-primary-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-gray-600">
-                  Jl. Sablon Kreatif No. 123, Jakarta Selatan, 12345
-                </span>
+                <a
+                  href="https://www.google.com/maps/place/Jl.+Mr.+Iskandar+No.108,+Dluwungan,+Mlangsen,+Kec.+Blora,+Kabupaten+Blora,+Jawa+Tengah+58214/@-6.9822287,111.4114344,17z/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-600 hover:text-primary-500"
+                >
+                  Jl. Mr. Iskandar No.108, Dluwungan, Mlangsen, Kec. Blora, Kabupaten Blora, Jawa Tengah 58214
+                </a>
               </li>
             </ul>
           </div>
