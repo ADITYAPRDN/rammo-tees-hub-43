@@ -7,19 +7,36 @@ export type { Order, OrderItem };
 
 export const fetchOrders = async (): Promise<Order[]> => {
   try {
-    // Fetch orders from Supabase without explicitly listing columns that might not exist in the type definition
+    // Fetch orders from Supabase
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select('*, order_items(*)');
+      .select('id, customer_id, notes, status, created_at, order_items(*)');
     
     if (ordersError) throw ordersError;
     
+    // Query customer data to get name and contact information
+    const customerPromises = orders.map(async (order) => {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('name, contact')
+        .eq('id', order.customer_id)
+        .single();
+
+      return {
+        ...order,
+        customerName: customer?.name || '',
+        contact: customer?.contact || ''
+      };
+    });
+
+    const ordersWithCustomerInfo = await Promise.all(customerPromises);
+    
     // Transform the data to match our Order interface
-    return orders.map(order => ({
+    return ordersWithCustomerInfo.map(order => ({
       id: order.id,
       customerId: order.customer_id,
-      customerName: order.customer_name || '',
-      contact: order.contact || '',
+      customerName: order.customerName,
+      contact: order.contact,
       notes: order.notes || '',
       status: order.status as Order['status'],
       createdAt: order.created_at,
@@ -41,17 +58,24 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
   try {
     const { data: order, error } = await supabase
       .from('orders')
-      .select('*, order_items(*)')
+      .select('id, customer_id, notes, status, created_at, order_items(*)')
       .eq('id', id)
       .single();
     
     if (error) throw error;
     
+    // Get customer info
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('name, contact')
+      .eq('id', order.customer_id)
+      .single();
+    
     return {
       id: order.id,
       customerId: order.customer_id,
-      customerName: order.customer_name || '',
-      contact: order.contact || '',
+      customerName: customer?.name || '',
+      contact: customer?.contact || '',
       notes: order.notes || '',
       status: order.status as Order['status'],
       createdAt: order.created_at,
@@ -71,18 +95,28 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
 
 export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]> => {
   try {
-    const { data: orders, error } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('contact', contactInfo);
+    // First, find customer by contact info
+    const { data: customer, error: customerError } = await supabase
+      .from('customers')
+      .select('id, name, contact')
+      .eq('contact', contactInfo)
+      .single();
     
-    if (error) throw error;
+    if (customerError) throw customerError;
+    
+    // Then get their orders
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select('id, customer_id, notes, status, created_at, order_items(*)')
+      .eq('customer_id', customer.id);
+    
+    if (ordersError) throw ordersError;
     
     return orders.map(order => ({
       id: order.id,
       customerId: order.customer_id,
-      customerName: order.customer_name || '',
-      contact: order.contact || '',
+      customerName: customer.name,
+      contact: customer.contact,
       notes: order.notes || '',
       status: order.status as Order['status'],
       createdAt: order.created_at,
@@ -102,13 +136,45 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
 
 export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promise<Order> => {
   try {
-    // Start a transaction to insert order and order items
+    // Check if customer exists
+    let customerId = order.customerId;
+    if (customerId === 'guest') {
+      // Create or update customer
+      const { data: existingCustomer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('contact', order.contact)
+        .maybeSingle();
+      
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+        
+        // Update customer name if it has changed
+        await supabase
+          .from('customers')
+          .update({ name: order.customerName })
+          .eq('id', customerId);
+      } else {
+        // Create new customer
+        const { data: newCustomer, error: customerError } = await supabase
+          .from('customers')
+          .insert({
+            name: order.customerName,
+            contact: order.contact
+          })
+          .select()
+          .single();
+        
+        if (customerError) throw customerError;
+        customerId = newCustomer.id;
+      }
+    }
+    
+    // Create order
     const { data: newOrder, error: orderError } = await supabase
       .from('orders')
       .insert({
-        customer_id: order.customerId,
-        customer_name: order.customerName,
-        contact: order.contact,
+        customer_id: customerId,
         notes: order.notes,
         status: order.status
       })
@@ -136,9 +202,9 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
     // Return the created order with proper format
     return {
       id: newOrder.id,
-      customerId: newOrder.customer_id,
-      customerName: newOrder.customer_name || '',
-      contact: newOrder.contact || '',
+      customerId: customerId,
+      customerName: order.customerName,
+      contact: order.contact,
       notes: newOrder.notes || '',
       status: newOrder.status as Order['status'],
       createdAt: newOrder.created_at,
@@ -156,16 +222,23 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
       .from('orders')
       .update({ status })
       .eq('id', orderId)
-      .select('*, order_items(*)')
+      .select('id, customer_id, notes, status, created_at, order_items(*)')
       .single();
     
     if (error) throw error;
     
+    // Get customer info
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('name, contact')
+      .eq('id', data.customer_id)
+      .single();
+    
     return {
       id: data.id,
       customerId: data.customer_id,
-      customerName: data.customer_name || '',
-      contact: data.contact || '',
+      customerName: customer?.name || '',
+      contact: customer?.contact || '',
       notes: data.notes || '',
       status: data.status as Order['status'],
       createdAt: data.created_at,
