@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import type { Order, OrderItem } from '@/lib/data';
 
@@ -7,42 +6,42 @@ export type { Order, OrderItem };
 
 export const fetchOrders = async (): Promise<Order[]> => {
   try {
-    // Fetch orders from Supabase
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select('id, customer_id, notes, status, created_at, order_items(*)');
+      .select(`
+        *,
+        order_items (*)
+      `);
     
     if (ordersError) throw ordersError;
     
-    // Query customer data to get name and contact information
     const customerPromises = orders.map(async (order) => {
       const { data: customer } = await supabase
         .from('customers')
         .select('name, contact')
         .eq('id', order.customer_id)
         .single();
-
+      
       return {
         ...order,
         customerName: customer?.name || '',
         contact: customer?.contact || ''
       };
     });
-
+    
     const ordersWithCustomerInfo = await Promise.all(customerPromises);
     
-    // Transform the data to match our Order interface
     return ordersWithCustomerInfo.map(order => ({
       id: order.id,
       customerId: order.customer_id,
       customerName: order.customerName,
       contact: order.contact,
       notes: order.notes || '',
-      status: order.status as Order['status'],
+      status: order.status,
       createdAt: order.created_at,
       products: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
-        productName: item.product_name || 'Product', // Fallback name
+        productName: item.product_name,
         size: item.size,
         quantity: item.quantity,
         price: item.price
@@ -64,7 +63,6 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
     
     if (error) throw error;
     
-    // Get customer info
     const { data: customer } = await supabase
       .from('customers')
       .select('name, contact')
@@ -95,7 +93,6 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
 
 export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]> => {
   try {
-    // First, find customer by contact info
     const { data: customer, error: customerError } = await supabase
       .from('customers')
       .select('id, name, contact')
@@ -104,7 +101,6 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
     
     if (customerError) throw customerError;
     
-    // Then get their orders
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('id, customer_id, notes, status, created_at, order_items(*)')
@@ -136,10 +132,9 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
 
 export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promise<Order> => {
   try {
-    // Check if customer exists
     let customerId = order.customerId;
+    
     if (customerId === 'guest') {
-      // Create or update customer
       const { data: existingCustomer } = await supabase
         .from('customers')
         .select('id')
@@ -148,14 +143,11 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
       
       if (existingCustomer) {
         customerId = existingCustomer.id;
-        
-        // Update customer name if it has changed
         await supabase
           .from('customers')
           .update({ name: order.customerName })
           .eq('id', customerId);
       } else {
-        // Create new customer
         const { data: newCustomer, error: customerError } = await supabase
           .from('customers')
           .insert({
@@ -170,7 +162,6 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
       }
     }
     
-    // Create order
     const { data: newOrder, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -183,11 +174,9 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
     
     if (orderError) throw orderError;
     
-    // Insert order items
     const orderItems = order.products.map(product => ({
       order_id: newOrder.id,
       product_id: product.productId,
-      product_name: product.productName,
       size: product.size,
       quantity: product.quantity,
       price: product.price
@@ -199,14 +188,13 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
     
     if (itemsError) throw itemsError;
     
-    // Return the created order with proper format
     return {
       id: newOrder.id,
-      customerId: customerId,
+      customerId,
       customerName: order.customerName,
       contact: order.contact,
-      notes: newOrder.notes || '',
-      status: newOrder.status as Order['status'],
+      notes: order.notes,
+      status: newOrder.status,
       createdAt: newOrder.created_at,
       products: order.products
     };
@@ -227,7 +215,6 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
     
     if (error) throw error;
     
-    // Get customer info
     const { data: customer } = await supabase
       .from('customers')
       .select('name, contact')
@@ -258,7 +245,6 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
 
 export const deleteOrder = async (id: string): Promise<boolean> => {
   try {
-    // With CASCADE constraint, this will delete related order_items too
     const { error } = await supabase
       .from('orders')
       .delete()

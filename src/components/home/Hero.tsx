@@ -9,9 +9,16 @@ const Hero = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 animate-slide-up">
-              Kualitas Sablon <span className="text-primary-500">Premium</span> untuk Semua Kebutuhan
-            </h1>
+            <div className="flex items-center gap-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 animate-slide-up">
+                Kualitas Sablon <span className="text-primary-500">Premium</span> untuk Semua Kebutuhan
+              </h1>
+              <img
+                src="/lovable-uploads/0534165a-e617-4e9c-b51d-3c0d933bba9b.png"
+                alt="Sablon Plastisol"
+                className="w-32 h-32 object-contain hidden md:block"
+              />
+            </div>
             <p className="text-lg md:text-xl text-gray-600 max-w-lg animate-slide-up delay-150">
               Baju kaos berkualitas tinggi dengan sablon terbaik untuk acara, bisnis, atau ekspresi kreatif Anda.
             </p>
