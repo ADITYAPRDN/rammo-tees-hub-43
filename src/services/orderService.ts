@@ -1,6 +1,6 @@
 
-import { Order, OrderItem } from '@/lib/data';
 import { supabase } from '@/integrations/supabase/client';
+import type { Order, OrderItem } from '@/lib/data';
 
 // Export the Order interface again to make it directly available from this service
 export type { Order, OrderItem };
@@ -18,10 +18,10 @@ export const fetchOrders = async (): Promise<Order[]> => {
     return orders.map(order => ({
       id: order.id,
       customerId: order.customer_id,
-      customerName: order.customer_name,
-      contact: order.contact,
+      customerName: order.customer_name || '',
+      contact: order.contact || '',
       notes: order.notes || '',
-      status: order.status,
+      status: order.status as Order['status'],
       createdAt: order.created_at,
       products: order.order_items.map((item: any) => ({
         productId: item.product_id,
@@ -50,10 +50,10 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
     return {
       id: order.id,
       customerId: order.customer_id,
-      customerName: order.customer_name,
-      contact: order.contact,
+      customerName: order.customer_name || '',
+      contact: order.contact || '',
       notes: order.notes || '',
-      status: order.status,
+      status: order.status as Order['status'],
       createdAt: order.created_at,
       products: order.order_items.map((item: any) => ({
         productId: item.product_id,
@@ -81,10 +81,10 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
     return orders.map(order => ({
       id: order.id,
       customerId: order.customer_id,
-      customerName: order.customer_name,
-      contact: order.contact,
+      customerName: order.customer_name || '',
+      contact: order.contact || '',
       notes: order.notes || '',
-      status: order.status,
+      status: order.status as Order['status'],
       createdAt: order.created_at,
       products: order.order_items.map((item: any) => ({
         productId: item.product_id,
@@ -137,10 +137,10 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
     return {
       id: newOrder.id,
       customerId: newOrder.customer_id,
-      customerName: newOrder.customer_name,
-      contact: newOrder.contact,
+      customerName: newOrder.customer_name || '',
+      contact: newOrder.contact || '',
       notes: newOrder.notes || '',
-      status: newOrder.status,
+      status: newOrder.status as Order['status'],
       createdAt: newOrder.created_at,
       products: order.products
     };
@@ -164,10 +164,10 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
     return {
       id: data.id,
       customerId: data.customer_id,
-      customerName: data.customer_name,
-      contact: data.contact,
+      customerName: data.customer_name || '',
+      contact: data.contact || '',
       notes: data.notes || '',
-      status: data.status,
+      status: data.status as Order['status'],
       createdAt: data.created_at,
       products: data.order_items.map((item: any) => ({
         productId: item.product_id,
