@@ -60,100 +60,80 @@ const ContactSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: <MessageSquare className="h-6 w-6 text-primary-500" />,
-              title: "WhatsApp",
-              content: (
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-                    <MessageSquare className="h-6 w-6 text-primary-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">WhatsApp</h3>
-                  <p className="text-gray-600 mb-4">Hubungi kami langsung melalui WhatsApp untuk layanan cepat</p>
-                  <a
-                    href={`https://wa.me/${settings?.whatsapp.replace(/[^0-9]/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center text-primary-600 hover:text-primary-700"
-                  >
-                    {settings?.whatsapp}
-                  </a>
-                  <Button 
-                    variant="outline" 
-                    className="mt-4"
-                    onClick={() => window.open(`https://wa.me/${settings?.whatsapp.replace(/[^0-9]/g, '')}`, '_blank', 'noopener,noreferrer')}
-                  >
-                    Chat Sekarang
-                  </Button>
-                </CardContent>
-              )
-            },
-            {
-              icon: <Instagram className="h-6 w-6 text-primary-500" />,
-              title: "Social Media",
-              content: (
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-                    <Instagram className="h-6 w-6 text-primary-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Social Media</h3>
-                  <p className="text-gray-600 mb-4">Ikuti kami di media sosial untuk update dan inspirasi desain</p>
-                  <div className="space-y-2">
-                    <a
-                      href={`https://instagram.com/${settings?.instagram.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-primary-600 hover:text-primary-700"
-                    >
-                      Instagram: {settings?.instagram}
-                    </a>
-                    <a
-                      href={`https://tiktok.com/${settings?.tiktok}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-primary-600 hover:text-primary-700"
-                    >
-                      TikTok: {settings?.tiktok}
-                    </a>
-                  </div>
-                </CardContent>
-              )
-            },
-            {
-              icon: <MapPin className="h-6 w-6 text-primary-500" />,
-              title: "Lokasi",
-              content: (
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-                    <MapPin className="h-6 w-6 text-primary-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Lokasi</h3>
-                  <p className="text-gray-600 mb-4">Kunjungi workshop kami di:</p>
-                  <address className="not-italic text-gray-700 mb-4">
-                    {settings?.address}
-                  </address>
-                  <Link to="/contact">
-                    <Button variant="outline">Lihat di Peta</Button>
-                  </Link>
-                </CardContent>
-              )
-            }
-          ].map((item, index) => (
-            <Card 
-              key={item.title}
-              className="bg-white shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                {item.content}
-              </CardContent>
-            </Card>
-          ))}
+          <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center mb-4">
+                <MessageSquare className="h-6 w-6 text-primary-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">WhatsApp</h3>
+              <p className="text-gray-600 mb-4">Hubungi kami langsung melalui WhatsApp untuk layanan cepat</p>
+              <a
+                href="https://wa.link/y2tfq3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center text-primary-600 hover:text-primary-700"
+              >
+                +62 852-1829-5384
+              </a>
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => window.open("https://wa.link/y2tfq3", '_blank', 'noopener,noreferrer')}
+              >
+                Chat Sekarang
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up delay-150">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center mb-4">
+                <Instagram className="h-6 w-6 text-primary-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Social Media</h3>
+              <p className="text-gray-600 mb-4">Ikuti kami di media sosial untuk update dan inspirasi desain</p>
+              <div className="space-y-2">
+                <a
+                  href="https://www.instagram.com/rammoclothing/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-primary-600 hover:text-primary-700"
+                >
+                  Instagram: @rammoclothing
+                </a>
+                <a
+                  href="https://www.tiktok.com/@rammoclothing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-primary-600 hover:text-primary-700"
+                >
+                  TikTok: @rammoclothing
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up delay-300">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center mb-4">
+                <MapPin className="h-6 w-6 text-primary-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Lokasi</h3>
+              <p className="text-gray-600 mb-4">Kunjungi workshop kami di:</p>
+              <address className="not-italic text-gray-700 mb-4">
+                Workshop Rammo<br />
+                Jl. R.A Kartini No.1, Ngringin Condongcatur<br />
+                Kec. Depok, Kabupaten Sleman<br />
+                Daerah Istimewa Yogyakarta 55281
+              </address>
+              <Button 
+                variant="outline"
+                onClick={() => window.open("https://maps.app.goo.gl/M2fJJANhpgTJ58pE7", '_blank', 'noopener,noreferrer')}
+              >
+                Lihat di Maps
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </section>

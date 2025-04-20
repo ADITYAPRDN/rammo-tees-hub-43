@@ -1,4 +1,3 @@
-
 // Tipe data untuk pengaturan situs
 export interface SiteSettings {
   siteName: string;
@@ -14,11 +13,11 @@ export interface SiteSettings {
 let siteSettings: SiteSettings = {
   siteName: 'RAMMO Store',
   siteDescription: 'Toko fashion online dengan produk berkualitas tinggi',
-  phoneNumber: '+6281234567890',
-  whatsapp: '+6281234567890',
-  instagram: '@rammostore',
-  tiktok: '@rammostore',
-  address: 'Jl. Pahlawan No. 123, Surabaya, Indonesia'
+  phoneNumber: '+62 852-1829-5384',
+  whatsapp: '+62 852-1829-5384',
+  instagram: '@rammoclothing',
+  tiktok: '@rammoclothing',
+  address: 'Jl. R.A Kartini No.1, Ngringin Condongcatur, Kec. Depok, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55281'
 };
 
 export const getSiteSettings = async (): Promise<SiteSettings> => {
