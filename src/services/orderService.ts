@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import type { Order, OrderItem } from '@/lib/data';
 
@@ -37,7 +38,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
       customerName: order.customerName,
       contact: order.contact,
       notes: order.notes || '',
-      status: order.status,
+      status: order.status as Order['status'], // Explicitly cast to the correct type
       createdAt: order.created_at,
       products: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
@@ -75,7 +76,7 @@ export const fetchOrderById = async (id: string): Promise<Order | undefined> => 
       customerName: customer?.name || '',
       contact: customer?.contact || '',
       notes: order.notes || '',
-      status: order.status as Order['status'],
+      status: order.status as Order['status'], // Explicitly cast to the correct type
       createdAt: order.created_at,
       products: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
@@ -114,7 +115,7 @@ export const fetchCustomerOrders = async (contactInfo: string): Promise<Order[]>
       customerName: customer.name,
       contact: customer.contact,
       notes: order.notes || '',
-      status: order.status as Order['status'],
+      status: order.status as Order['status'], // Explicitly cast to the correct type
       createdAt: order.created_at,
       products: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
@@ -167,16 +168,18 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
       .insert({
         customer_id: customerId,
         notes: order.notes,
-        status: order.status
+        status: order.status // This is already the correct type from the parameter
       })
       .select()
       .single();
     
     if (orderError) throw orderError;
     
+    // Prepare order items with product names
     const orderItems = order.products.map(product => ({
       order_id: newOrder.id,
       product_id: product.productId,
+      product_name: product.productName,
       size: product.size,
       quantity: product.quantity,
       price: product.price
@@ -194,7 +197,7 @@ export const createOrder = async (order: Omit<Order, 'id' | 'createdAt'>): Promi
       customerName: order.customerName,
       contact: order.contact,
       notes: order.notes,
-      status: newOrder.status,
+      status: newOrder.status as Order['status'], // Explicitly cast to ensure type safety
       createdAt: newOrder.created_at,
       products: order.products
     };
@@ -227,7 +230,7 @@ export const updateOrderStatus = async (orderId: string, status: Order['status']
       customerName: customer?.name || '',
       contact: customer?.contact || '',
       notes: data.notes || '',
-      status: data.status as Order['status'],
+      status: data.status as Order['status'], // Explicitly cast to the correct type
       createdAt: data.created_at,
       products: (data.order_items || []).map((item: any) => ({
         productId: item.product_id,
