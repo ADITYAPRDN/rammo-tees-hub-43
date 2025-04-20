@@ -72,9 +72,9 @@ const ContactPage = () => {
                     <h3 className="text-lg font-semibold mb-1">Alamat Workshop</h3>
                     <address className="not-italic text-gray-600 mb-2">
                       Workshop Rammo<br />
-                      Jl. R.A Kartini No.1, Ngringin Condongcatur<br />
-                      Kec. Depok, Kabupaten Sleman<br />
-                      Daerah Istimewa Yogyakarta 55281<br />
+                      Jl. Mr. Iskandar No.108, Dluwungan, Mlangsen<br />
+                      Kec. Blora, Kabupaten Blora<br />
+                      Jawa Tengah 58214<br />
                       Indonesia
                     </address>
                   </div>
