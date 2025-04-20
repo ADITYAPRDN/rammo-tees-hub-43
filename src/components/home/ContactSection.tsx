@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -122,13 +123,13 @@ const ContactSection = () => {
               <p className="text-gray-600 mb-4">Kunjungi workshop kami di:</p>
               <address className="not-italic text-gray-700 mb-4">
                 Workshop Rammo<br />
-                Jl. R.A Kartini No.1, Ngringin Condongcatur<br />
-                Kec. Depok, Kabupaten Sleman<br />
-                Daerah Istimewa Yogyakarta 55281
+                Jl. Mr. Iskandar No.108, Dluwungan, Mlangsen<br />
+                Kec. Blora, Kabupaten Blora<br />
+                Jawa Tengah 58214
               </address>
               <Button 
                 variant="outline"
-                onClick={() => window.open("https://maps.app.goo.gl/M2fJJANhpgTJ58pE7", '_blank', 'noopener,noreferrer')}
+                onClick={() => window.open("https://www.google.com/maps/place/Jl.+Mr.+Iskandar+No.108,+Dluwungan,+Mlangsen,+Kec.+Blora,+Kabupaten+Blora,+Jawa+Tengah+58214/@-6.9822287,111.4114344,17z", '_blank', 'noopener,noreferrer')}
               >
                 Lihat di Maps
               </Button>
@@ -141,3 +142,4 @@ const ContactSection = () => {
 };
 
 export default ContactSection;
+
